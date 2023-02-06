@@ -8,6 +8,8 @@
     "mongoose": "^6.9.0"
   },
   "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js",
     "devStart": "nodemon -e js,ejs,css,html server.js"
   },
   "devDependencies": {

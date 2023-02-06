@@ -7,7 +7,7 @@ const app = express();
 
 connectDB()
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000
 
 const bookRouter = require("./routes/books");
 

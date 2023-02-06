@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>HELLOasd</h2>
+    <%= locals.text || 'default text' %>
+    <div class="endpoints">
+        <ul>endpoints
+            <ul>users
+                <li>GET<a href="/users">/users</a></li>
+                <li>POST<a href="/users">/users (create new user)</a></li>
+                <li>GET<a href="/users/1">/users/userId (get user with specific userId)</a></li>
+                <li>GET<a href="/users/new">/users/new (new user form idk)</a></li>
+            </ul>
+            <p></p>
+            <ul>books
+                <li>GET<a href="/books">/books (get all books)</a></li>
+                <li>POST<a href="/books/new">/books (post new book)</a></li>
+                <li>GET<a href="/books/1">/books/bookId (get book with specific bookId)</a></li>
+            </ul>
+        </ul>
+    </div>
+</body>
+</html>

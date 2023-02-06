@@ -1,13 +1,17 @@
 const asyncHandler = require("express-async-handler")
+
+const Book = require("../models/bookModel")
 // get all books
 // @route GET /api/books
 // @queryParam? title
 const getBooks = asyncHandler(async(req,res) => {
-    console.log(req.query.title)
+    // console.log(req.query.title)
     if (req.query.title) {
-        res.json({title:req.query.title})
+        const book = await Book.findOne({title:req.query.title})
+        res.status(200).json(book)
     } else {
-        res.json({books:['book1','book2']})
+        const books = await Book.find()
+        res.status(200).json(books)
     }
 })
 // post a book
@@ -16,9 +20,12 @@ const postBook = asyncHandler(async(req,res) => {
     if (!req.body.title) {
         res.status(400)
         throw new Error('Title cannot be empty')
-    } else {
-        res.status(200).json({title:req.body.title})
     }
+    const book = await Book.create({
+        title: req.body.title
+    })
+
+    res.status(200).json(book)
 })
 
 // get book by id

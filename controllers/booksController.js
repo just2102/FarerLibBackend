@@ -18,7 +18,7 @@ const getBooks = asyncHandler(async (req, res) => {
 // post a book
 // @route POST /api/books
 const postBook = asyncHandler(async (req, res) => {
-  // throw errors if either of title or author fields are empty
+  // throw errors if either of the required fields is empty
   if (!req.body.title) {
     res.status(400);
     throw new Error("Title cannot be empty!");
@@ -27,17 +27,30 @@ const postBook = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Book has to have an author!");
   }
-  // creates a bookData object based on title and author
+  if (!req.body.genre) {
+    res.status(400);
+    throw new Error("Book's genre should be specified")
+  }
+  // creates a bookData object based on title, author and genre parameters provided
   // year parameter is optional
   const bookData = {
     title: req.body.title,
     author: req.body.author,
+    genre: req.body.genre
   };
   if (req.body.year) {
     bookData.year = req.body.year;
   }
-  const book = await Book.create(bookData);
-  res.status(200).json(book);
+  try {
+    const book = await Book.create(bookData);
+    res.status(200).json(book);
+  } catch (err) {
+    if (err.name==='ValidationError') {
+      res.status(404).json({message:"Book's author was not found, please check author id provided or create a new author"})
+    } else {
+      throw err
+    }
+  }
 });
 
 // get book by id

@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Book = require("../models/bookModel");
 // get all books
@@ -8,10 +8,11 @@ const Book = require("../models/bookModel");
 const getBooks = asyncHandler(async (req, res) => {
   // console.log(req.query.title)
   if (req.query.title) {
-    const book = await Book.findOne({ title: req.query.title });
+    const book = await Book.findOne({ title: req.query.title })
+    .populate('author');
     res.status(200).json(book);
   } else {
-    const books = await Book.find();
+    const books = await Book.find().populate('author');
     res.status(200).json(books);
   }
 });
@@ -29,14 +30,14 @@ const postBook = asyncHandler(async (req, res) => {
   }
   if (!req.body.genre) {
     res.status(400);
-    throw new Error("Book's genre should be specified")
+    throw new Error("Book's genre should be specified");
   }
   // creates a bookData object based on title, author and genre parameters provided
   // year parameter is optional
   const bookData = {
     title: req.body.title,
     author: req.body.author,
-    genre: req.body.genre
+    genre: req.body.genre,
   };
   if (req.body.year) {
     bookData.year = req.body.year;
@@ -45,10 +46,15 @@ const postBook = asyncHandler(async (req, res) => {
     const book = await Book.create(bookData);
     res.status(200).json(book);
   } catch (err) {
-    if (err.name==='ValidationError') {
-      res.status(404).json({message:"Book's author was not found, please check author id provided or create a new author"})
+    if (err.name === "ValidationError") {
+      res
+        .status(404)
+        .json({
+          message:
+            "Book's author was not found, please check author id provided or create a new author",
+        });
     } else {
-      throw err
+      throw err;
     }
   }
 });
@@ -62,7 +68,8 @@ const getBookById = asyncHandler(async (req, res) => {
     throw new Error("Invalid bookId. It should be a string");
   }
   // if type is valid (string), continue
-  const book = await Book.findById(req.params.bookId);
+  const book = await Book.findById(req.params.bookId)
+  .populate('author');
   // if book was not found, return 'book not found' message
   if (!book) {
     res.status(404);
@@ -78,13 +85,17 @@ const deleteBookById = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid bookId. It should be a string");
   }
-  const bookToDelete = await Book.deleteOne({ "_id": mongoose.Types.ObjectId(req.params.bookId) });
-  if (bookToDelete.acknowledged && bookToDelete.deletedCount===0) {
+  const bookToDelete = await Book.deleteOne({
+    _id: mongoose.Types.ObjectId(req.params.bookId),
+  });
+  if (bookToDelete.acknowledged && bookToDelete.deletedCount === 0) {
     res.status(404);
-    throw new Error('Book not found. It was either already deleted or the id provided was incorrect.')
+    throw new Error(
+      "Book not found. It was either already deleted or the id provided was incorrect."
+    );
   }
-  if (bookToDelete.acknowledged && bookToDelete.deletedCount===1) {
-    res.status(200).json({message: 'Book successfully deleted'})
+  if (bookToDelete.acknowledged && bookToDelete.deletedCount === 1) {
+    res.status(200).json({ message: "Book successfully deleted" });
   }
 });
 

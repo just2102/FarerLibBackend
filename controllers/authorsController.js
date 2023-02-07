@@ -21,6 +21,7 @@ const postAuthor = asyncHandler(async(req,res)=>{
     // dates of birth and death are optional
     // first and last names are required
     const newAuthorData = {
+        _id: new mongoose.Types.ObjectId(),
         first_name: req.body.first_name,
         last_name: req.body.last_name,
     }

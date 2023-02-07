@@ -79,6 +79,7 @@ const getBookById = asyncHandler(async (req, res) => {
   }
   res.status(200).json(book);
 });
+
 // delete book by id
 // @route DELETE /api/books/:bookId
 const deleteBookById = asyncHandler(async (req, res) => {
@@ -87,18 +88,12 @@ const deleteBookById = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid bookId. It should be a string");
   }
-  const bookToDelete = await Book.deleteOne({
-    _id: mongoose.Types.ObjectId(req.params.bookId),
-  });
-  if (bookToDelete.acknowledged && bookToDelete.deletedCount === 0) {
-    res.status(404);
-    throw new Error(
-      "Book not found. It was either already deleted or the id provided was incorrect."
-    );
+  const bookToDelete = await Book.findByIdAndDelete(req.params.bookId);
+  if (!bookToDelete) {
+    res.status(404).json({message:"Book not found! Check id"})
   }
-  if (bookToDelete.acknowledged && bookToDelete.deletedCount === 1) {
-    res.status(200).json({ message: "Book successfully deleted" });
-  }
+  await Author.updateOne({_id: bookToDelete.author}, {$pull: {books: bookToDelete._id}})
+  res.status(200).json({ message: "Book successfully deleted" })
 });
 
 module.exports = {

@@ -12,8 +12,8 @@
     <div class="endpoints">
     <h3>Endpoints</h3>
             <ul><h2>Books</h2>
-                <li>GET/books (get all books)</li>
-                <li>POST/books (post new book)
+                <li>GET/api/books (get all books)</li>
+                <li>POST/api/books (post new book)
                     <p>Expects an object like this:</p>
                     <p>{title:string,</p>
                     <p> author:id(example 63e2444dedb5783bf04e57cd),</p>
@@ -21,19 +21,19 @@
                     <p>year?:number,</p>  summary?:string}
                 </li>
 
-                <li>GET/books/bookId (get book by bookId)</li>
-                <li>DELETE/books/bookId (delete book by bookId)</li>
+                <li>GET/api/books/bookId (get book by bookId)</li>
+                <li>DELETE/api/books/bookId (delete book by bookId)</li>
             </ul>
             <ul><h2>Authors</h2>
-                <li>GET/authors (get all authors and their books)</li>
-                <li>POST/authors (post new author)
+                <li>GET/api/authors (get all authors and their books)</li>
+                <li>POST/api/authors (post new author)
                     <p>Expects an object like this:</p>
                     <p>{first_name: string,</p>
                     <p>last_name: string,</p>
                     <p>date_of_birth?: Date,</p>
                     <p>date_of_death?: Date}</p>
                 </li>
-                <li>GET/authors/authorId (get author by authorId)</li>
+                <li>GET/api/authors/authorId (get author by authorId)</li>
             </ul>
 
     </div>

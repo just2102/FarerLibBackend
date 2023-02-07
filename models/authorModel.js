@@ -3,7 +3,6 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
 
 const authorSchema = new Schema({
-    _id: Schema.Types.ObjectId,
     first_name: {
         type: String,
         required: true, maxLength: 100
@@ -17,7 +16,8 @@ const authorSchema = new Schema({
     },
     date_of_death: {
         type: Date
-    }
+    },
+    books: [{type: Schema.Types.ObjectId, ref: 'Book'}]
 })
 
 module.exports = mongoose.model("Author",authorSchema)

@@ -2,10 +2,10 @@ const asyncHandler = require("express-async-handler")
 const mongoose = require("mongoose")
 const Author = require("../models/authorModel")
 
-// get all authors from db
+// get all authors from db (and their books)
 // @route GET   /api/authors
 const getAuthors = asyncHandler(async(req,res)=>{
-    const authors = await Author.find()
+    const authors = await Author.find().populate("books")
     if (!authors.length) {
         res.status(404)
         throw new Error('Authors not found, please add a new author!')
@@ -21,7 +21,6 @@ const postAuthor = asyncHandler(async(req,res)=>{
     // dates of birth and death are optional
     // first and last names are required
     const newAuthorData = {
-        _id: new mongoose.Types.ObjectId(),
         first_name: req.body.first_name,
         last_name: req.body.last_name,
     }
@@ -43,7 +42,7 @@ const getAuthorById = asyncHandler(async(req,res)=>{
         res.status(400)
         throw new Error('authorId should be a string!')
     }
-    const author = await Author.findOne({"_id":  mongoose.Types.ObjectId(req.params.authorId)})
+    const author = await Author.findOne({"_id":  mongoose.Types.ObjectId(req.params.authorId)}).populate("books")
     if (!author) {
         res.status(404)
         throw new Error ('Author not found!')

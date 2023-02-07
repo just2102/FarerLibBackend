@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
+const Author = require("../models/authorModel")
 
 const Book = require("../models/bookModel");
 // get all books
@@ -44,6 +45,7 @@ const postBook = asyncHandler(async (req, res) => {
   }
   try {
     const book = await Book.create(bookData);
+    await Author.updateOne({_id:book.author}, {$push: {books:book._id}})
     res.status(200).json(book);
   } catch (err) {
     if (err.name === "ValidationError") {

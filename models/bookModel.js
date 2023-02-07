@@ -15,7 +15,7 @@ const bookSchema = mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Author",
-      required: [true, 'All books have authors']
+      required: [true, "All books have authors"],
     },
     year: {
       type: Number,

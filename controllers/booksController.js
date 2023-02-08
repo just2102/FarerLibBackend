@@ -20,28 +20,29 @@ const getBooks = asyncHandler(async (req, res) => {
 // post a book
 // @route POST /api/books
 const postBook = asyncHandler(async (req, res) => {
+  const body = await req.body
   // throw errors if either of the required fields is empty
-  if (!req.body.title) {
-    res.status(400);
-    throw new Error("Title cannot be empty!");
+  if (!body.title) {
+    res.status(400).json({message: 'Title cannot be empty!'})
   }
-  if (!req.body.author) {
-    res.status(400);
-    throw new Error("Book has to have an author!");
+  if (!body.author) {
+    res.status(400).json({message: "Author cannot be empty!"});
   }
-  if (!req.body.genre) {
-    res.status(400);
-    throw new Error("Book's genre should be specified");
+  if (!body.genre) {
+    res.status(400).json({message: "Genre cannot be empty!"});
   }
   // creates a bookData object based on title, author and genre parameters provided
   // year parameter is optional
-  const bookData = {
-    title: req.body.title,
-    author: req.body.author,
-    genre: req.body.genre,
+  let bookData = {
+    title: body.title,
+    author: body.author,
+    genre: body.genre,
   };
-  if (req.body.year) {
-    bookData.year = req.body.year;
+  if (body.year) {
+    bookData.year = body.year;
+  }
+  if (body.summary) {
+    bookData.summary = body.summary
   }
   try {
     const book = await Book.create(bookData);

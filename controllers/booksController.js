@@ -97,10 +97,37 @@ const deleteBookById = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Book successfully deleted" })
 });
 
+// update book by id
+// @route PUT /api/books/:bookId
+const updateBookById = asyncHandler(async(req,res) => {
+  // check for necessary book properties (title,author and genre)
+  if (!req.body.title) {
+    return res.status(400).json({message: "Please provide the book's title"})
+  }
+  if (!req.body.author) {
+    return res.status(400).json({message: "Please provide the book's author"})
+  }
+  if (!req.body.genre) {
+    return res.status(400).json({message: "Please provide the book's genre"})
+  }
+  const bookToUpdate = await Book.findByIdAndUpdate(req.params.bookId, {
+    title:req.body.title,
+    author:req.body.author,
+    year: req.body.year,
+    summary: req.body.summary,
+    genre: req.body.genre, });
+  if (!bookToUpdate) {
+    res.status(404).json({message:"Book not found! Check id"})
+  }
+  await Author.updateOne({_id: bookToUpdate.author}, {$pull: {books: bookToUpdate._id}})
+  res.status(200).json({message: "Book successfully updated"})
+})
+
 module.exports = {
   getBooks,
   postBook,
 
   getBookById,
   deleteBookById,
+  updateBookById
 };

@@ -5,6 +5,12 @@ const connectDB = require("./config/db")
 const dotenv = require("dotenv").config();
 const app = express();
 app.use(express.json())
+// handle options requests
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.sendStatus(204);
+});
 // allow cors 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");

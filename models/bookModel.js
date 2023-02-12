@@ -69,6 +69,11 @@ const bookSchema = mongoose.Schema(
       ],
       required: true,
     },
+    available: {
+      type: Boolean,
+      required:true,
+    },
+    cover: { type: mongoose.Types.ObjectId, ref: 'File' },
   },
   {
     timestamps: true,

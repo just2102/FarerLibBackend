@@ -3,6 +3,7 @@ const Role = require("../models/roleModel")
 const bcrypt = require('bcryptjs');
 const {validationResult} = require("express-validator")
 const jwt = require('jsonwebtoken');
+const session = require("express-session");
 
 const generateAccessToken = (id,roles) => {
     const payload = {
@@ -13,6 +14,29 @@ const generateAccessToken = (id,roles) => {
 }
 
 class authController {
+    async whoAmI(req,res) {
+        const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader) {
+            res.status(401).json({message: "No authorization header found"})
+        }
+        const [, token] = authorizationHeader.split(" ");
+        try {
+            // verify the token
+            const decoded = jwt.verify(token, process.env.SECRET_TOKEN)
+            // get user from db
+            const user = await User.findById(decoded.id)
+            // return the user without the password field
+            const userToReturn = {
+                id: user._id,
+                username: user.username,
+                role: user.roles[0]
+            }
+            return res.json(userToReturn)
+        } catch(err) {
+            return res.status(401).json({message:"Invalid token"})
+        }
+    }
+
     async register(req,res) {
         try {
             const errors = validationResult(req)
@@ -39,6 +63,7 @@ class authController {
 
     }
     async login(req,res) {
+        // returns token on success
         try {
             const {username, password} = req.body
             const user = await User.findOne({username})
@@ -50,12 +75,16 @@ class authController {
                 return res.status(400).json({message: 'Incorrect username or password'})
             }
             const token = generateAccessToken(user._id, user.roles)
+            req.session.token = token;
             return res.json({token})
-
         } catch(e) {
             console.log(e)
             res.status(400).json({message: "Login error"})
         }
+    }
+    async logout(req,res) {
+        await req.session.destroy();
+        res.status(200).json({message:"You have successfully logged out"});
     }
 
     async getUsers(req,res) {

@@ -2,14 +2,20 @@ const express = require("express");
 const colors = require("colors")
 const { errorHandler } = require("./middleware/errorMiddleware");
 const connectDB = require("./config/db")
+const session = require("express-session");
 const dotenv = require("dotenv").config();
 const app = express();
 app.use(express.json())
+app.use(session({
+  secret: process.env.SECRET_TOKEN,
+  resave: false,
+  saveUninitialized: true
+}));
 // allow cors 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
   });
 app.use(errorHandler)

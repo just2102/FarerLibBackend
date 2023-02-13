@@ -10,8 +10,10 @@ router.post('/register', [
     check('password', "Password should be longer than 4 and shorter than 15 symbols").isLength({min:4, max:15})
 ], controller.register)
 router.post('/login', controller.login)
-router.get('/users', roleMiddleware(['ADMIN']), controller.getUsers)
+router.post('/logout', controller.logout)
+router.get('/whoAmI', controller.whoAmI)
 
+router.get('/users', roleMiddleware(['ADMIN']), controller.getUsers)
 
 
 module.exports = router

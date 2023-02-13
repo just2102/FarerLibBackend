@@ -5,6 +5,7 @@ const fileSchema = new mongoose.Schema({
     path: { type: String, required: true },
     size: { type: Number, required: true },
     mimetype: { type: String, required: true },
+    
   });
  
  

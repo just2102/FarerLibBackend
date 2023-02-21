@@ -162,32 +162,74 @@ const deleteBookById = asyncHandler(async (req, res) => {
 const updateBookById = asyncHandler(async (req, res) => {
   // check for necessary book properties (title,author and genre)
   if (!req.body.title) {
-    return res.status(400).json({ message: "Please provide the book's title" });
+    return res.status(400).json({ message: "Please specify the book's title" });
   }
   if (!req.body.author) {
     return res
       .status(400)
-      .json({ message: "Please provide the book's author" });
+      .json({ message: "Please specify the book's author" });
   }
   if (!req.body.genre) {
-    return res.status(400).json({ message: "Please provide the book's genre" });
+    return res.status(400).json({ message: "Please specify the book's genre" });
   }
-  const bookToUpdate = await Book.findByIdAndUpdate(req.params.bookId, {
-    title: req.body.title,
+  const newBookObject = {
+    title:req.body.title,
     author: req.body.author,
     year: req.body.year,
     summary: req.body.summary,
     genre: req.body.genre,
-    available: req.body.available,
-  });
+    available: req.body.available
+  }
+  const bookToUpdate = await Book.findByIdAndUpdate(req.params.bookId, newBookObject);
   if (!bookToUpdate) {
     res.status(404).json({ message: "Book not found! Check id" });
   }
-  await Author.updateOne(
-    { _id: bookToUpdate.author },
-    { $pull: { books: bookToUpdate._id } }
-  );
-  res.status(200).json({ message: "Book successfully updated" });
+  // create cover entry in DB and associate it with the newly-created book
+  // but only if it is a new cover
+  let cover;
+    if (req.body.cover && req.body.cover!=="NOCHANGE") {
+      try {
+        await cloudinary.uploader.upload(req.body.cover,{
+          crop:'fill',
+          width: 400,
+          height: 600,
+          gravity: 'center',
+          quality: 80
+        }).then(async response=>{
+          const coverData = {
+          bookId: bookToUpdate._id,
+          public_id: response.public_id,
+          resource_type: response.resource_type,
+          bytes: response.bytes,
+          url: response.url
+          }
+          cover = await Cover.create(coverData)
+          })
+        } catch(err) {
+          console.error(err.code)
+        }
+    }
+    // add cover id to the book document in DB
+    if (cover) {
+        newBookObject.cover = cover
+        await Book.updateOne(
+          { _id: bookToUpdate._id},
+          { $set: {cover: cover._id}}
+        )
+    }
+  // remove old cover if it existed and was replaced
+  if (bookToUpdate.cover && cover) {
+    if (bookToUpdate.cover !== cover._id) {
+      await Cover.findByIdAndDelete(bookToUpdate.cover).then((result)=>
+      cloudinary.uploader.destroy(result.public_id, {resource_type:'image'}, function(error,result) {
+        console.log(result, error)
+      })
+    )
+    }
+  }
+  // finally, get the newly-created book and return it
+  const finallyUpdatedBook = await Book.findById(bookToUpdate._id).populate('author').populate('cover')
+  res.status(200).json({data: finallyUpdatedBook,message: "Book successfully updated" });
 });
 
 // change book status

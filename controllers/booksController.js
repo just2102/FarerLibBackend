@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Author = require("../models/authorModel");
 const Book = require("../models/bookModel");
 const Cover = require("../models/coverModel")
+const User = require("../models/userModel")
 const dotenv = require("dotenv")
 const cloudinary = require('cloudinary').v2;
 
@@ -248,6 +249,56 @@ const changeBookStatus = asyncHandler(async (req, res) => {
   });
 });
 
+// get user books
+// @route GET /api/books/users/:userId
+const getUserBooks = asyncHandler(async (req,res) => {
+  const userToFind = await User.findById(req.params.userId)
+  .populate({
+      path: "books",
+      select: "_id title genre available createdAt updatedAt",
+      populate: {
+          path: "author",
+          // select: "_id name",
+      },
+  });
+    if (!userToFind) {
+          res.status(200).json({message: "User not found", status: "404"})
+    }
+    const books = userToFind.books
+    res.status(200).json(books)
+});
+
+// save a book (for a user) by its id
+// @route POST /api/books/users/:userId
+const bookmarkBook = asyncHandler(async (req,res) => {
+  const userToFind = await User.findById(req.params.userId)
+  if (!userToFind) {
+        res.status(200).json({message: "User not found", status: "404"})
+  }
+  console.log(req.body)
+  const updatedUser = await User.updateOne(
+    { _id: userToFind._id },
+    { $push: { books: req.body.bookId } }
+  );
+  console.log(updatedUser)
+  res.status(200).json({message: "Book successfully saved!", updatedUser:updatedUser})
+});
+
+// delete a book (for a user) by its id
+// @route PATCH /api/books/users/:userId
+const unbookmarkBook = asyncHandler(async (req,res) => {
+  const userToFind = await User.findById(req.params.userId)
+  if (!userToFind) {
+        res.status(200).json({message: "User not found", status: "404"})
+  }
+  const updatedUser = await User.updateOne(
+    { _id: userToFind._id },
+    { $pull: { books: req.body.bookId } }
+  );
+  res.status(200).json({message: "Book successfully saved!", updatedUser:updatedUser})
+});
+
+
 module.exports = {
   getBooks,
   postBook,
@@ -256,4 +307,8 @@ module.exports = {
   deleteBookById,
   updateBookById,
   changeBookStatus,
+
+  getUserBooks,
+  bookmarkBook,
+  unbookmarkBook
 };

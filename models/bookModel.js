@@ -78,6 +78,12 @@ const bookSchema = mongoose.Schema(
       ref: "Cover",
       required:false
      },
+     users: [
+      {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+      }
+     ]
   },
   {
     timestamps: true,

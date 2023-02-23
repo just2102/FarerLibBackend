@@ -16,6 +16,7 @@ const User = new Schema({
       ref: "Role",
     },
   ],
+  books: [{type: Schema.Types.ObjectId, ref: 'Book'}]
 });
 
 module.exports = model("User", User);

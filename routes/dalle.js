@@ -16,7 +16,7 @@ router.route("/")
 .post(async (req, res) => {
   try {
     const response = await openai.createImage({
-      prompt: req.body.prompt + ' BOOK COVER OIL PAINTING BEAUTIFUL',
+      prompt: req.body.prompt.slice(0,300) + ' GENERATE BOOK COVER',
       n: 1,
       response_format: "b64_json",
       size: "1024x1024",

@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken")
 
 const Author = require("../models/authorModel");
 const Book = require("../models/bookModel");
@@ -7,6 +8,7 @@ const Cover = require("../models/coverModel")
 const User = require("../models/userModel")
 const dotenv = require("dotenv")
 const cloudinary = require('cloudinary').v2;
+
 
 dotenv.config()
 cloudinary.config({
@@ -35,6 +37,12 @@ const getBooks = asyncHandler(async (req, res) => {
 // post a book
 // @route POST /api/books
 const postBook = asyncHandler(async (req, res) => {
+  // get current user (the one that's posting the book)
+  const token = req.headers.authorization.split(' ')[1]
+  if (!token) {
+      return res.status(403).json({message:"user not authorized"})
+  }
+  const decodedData = jwt.verify(token, process.env.SECRET_TOKEN)
     const body = await req.body;
     // throw errors if either of the required fields is empty
     if (!body.title) {
@@ -54,6 +62,7 @@ const postBook = asyncHandler(async (req, res) => {
       author: body.author,
       genre: body.genre,
       available: body.available,
+      creator: decodedData.id
     };
     if (body.year) {
       bookData.year = body.year;
@@ -255,11 +264,14 @@ const getUserBooks = asyncHandler(async (req,res) => {
   const userToFind = await User.findById(req.params.userId)
   .populate({
       path: "books",
-      select: "_id title genre available createdAt updatedAt",
-      populate: {
-          path: "author",
-          // select: "_id name",
-      },
+      select: "_id title genre cover available createdAt updatedAt",
+      populate: [
+        {
+          path: "author", // select: "_id name",
+        },
+        {
+          path: "cover",
+        }],
   });
     if (!userToFind) {
           res.status(200).json({message: "User not found", status: "404"})
@@ -275,27 +287,60 @@ const bookmarkBook = asyncHandler(async (req,res) => {
   if (!userToFind) {
         res.status(200).json({message: "User not found", status: "404"})
   }
-  console.log(req.body)
-  const updatedUser = await User.updateOne(
-    { _id: userToFind._id },
-    { $push: { books: req.body.bookId } }
-  );
-  console.log(updatedUser)
-  res.status(200).json({message: "Book successfully saved!", updatedUser:updatedUser})
+  // check if this book is already favorite or not
+  const checkIfFavorite = (bookId) => {
+    for (let i = 0; i<userToFind.books.length; i++) {
+      if (userToFind.books[i]._id.equals(mongoose.Types.ObjectId(bookId))) {
+        return true
+      }
+    }
+    return false
+  }
+  if (checkIfFavorite(req.body.bookId)===false) {
+    await User.updateOne(
+      { _id: userToFind._id },
+      { $push: { books: req.body.bookId } }
+    );
+    await Book.updateOne(
+      { _id: req.body.bookId},
+      { $push: {users: userToFind._id}}
+    )
+  res.status(200).json({message: "Book successfully saved!", status: 200})
+  } else if (checkIfFavorite(req.body.bookId)===true) {
+    res.status(200).json({message: "This book is already in your list of favorites!"})
+  }
+
 });
 
-// delete a book (for a user) by its id
+// 'unfavorite' a book by id
 // @route PATCH /api/books/users/:userId
 const unbookmarkBook = asyncHandler(async (req,res) => {
   const userToFind = await User.findById(req.params.userId)
   if (!userToFind) {
         res.status(200).json({message: "User not found", status: "404"})
   }
-  const updatedUser = await User.updateOne(
-    { _id: userToFind._id },
-    { $pull: { books: req.body.bookId } }
-  );
-  res.status(200).json({message: "Book successfully saved!", updatedUser:updatedUser})
+  const checkIfFavorite = (bookId) => {
+    for (let i = 0; i<userToFind.books.length; i++) {
+      if (userToFind.books[i]._id.equals(mongoose.Types.ObjectId(bookId))) {
+        return true
+      }
+    }
+    return false
+  }
+  if (checkIfFavorite(req.body.bookId)===false) {
+    res.status(200).json({message: "Book not found in your favorites!", status: 404})
+  }
+  if (checkIfFavorite(req.body.bookId)===true) {
+    await User.updateOne(
+      { _id: userToFind._id },
+      { $pull: { books: req.body.bookId } }
+    );
+    await Book.updateOne(
+      { _id: req.body.bookId },
+      { $pull: { users: userToFind._id } }
+    )
+    res.status(200).json({message: "Book successfully removed from favorites!", status: 200})
+  }
 });
 
 

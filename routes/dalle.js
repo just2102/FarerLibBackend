@@ -14,9 +14,10 @@ const router = express.Router();
 
 router.route("/")
 .post(async (req, res) => {
+  const prompt = req.body.summary
   try {
     const response = await openai.createImage({
-      prompt: req.body.prompt.slice(0,300) + ' GENERATE BOOK COVER',
+      prompt: prompt.slice(0,300) + ' GENERATE BOOK COVER',
       n: 1,
       response_format: "b64_json",
       size: "1024x1024",
@@ -25,7 +26,7 @@ router.route("/")
     res.status(200).json({ photo: image });
   } catch (err) {
     console.log(err);
-    res.status(500).send(err?.response.data.error.message);
+    res.status(500).send(err);
   }
 });
 

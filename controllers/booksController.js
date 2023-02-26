@@ -56,7 +56,6 @@ const postBook = asyncHandler(async (req, res) => {
     }
     // creates a bookData object based on title, author and genre parameters provided
     // other parameters are optional
-    let coverURL;
     let bookData = {
       title: body.title,
       author: body.author,
@@ -188,7 +187,7 @@ const updateBookById = asyncHandler(async (req, res) => {
     year: req.body.year,
     summary: req.body.summary,
     genre: req.body.genre,
-    available: req.body.available
+    available: req.body.available,
   }
   const bookToUpdate = await Book.findByIdAndUpdate(req.params.bookId, newBookObject);
   if (!bookToUpdate) {
@@ -264,7 +263,7 @@ const getUserBooks = asyncHandler(async (req,res) => {
   const userToFind = await User.findById(req.params.userId)
   .populate({
       path: "books",
-      select: "_id title genre cover available createdAt updatedAt",
+      select: "_id creator users title genre cover available createdAt updatedAt",
       populate: [
         {
           path: "author", // select: "_id name",

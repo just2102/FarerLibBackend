@@ -87,7 +87,16 @@ const bookSchema = mongoose.Schema(
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"
-    }
+    },
+    likes: {
+      type: Number
+    },
+    likedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   {
     timestamps: true,

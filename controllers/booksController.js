@@ -263,7 +263,7 @@ const getUserBooks = asyncHandler(async (req,res) => {
   const userToFind = await User.findById(req.params.userId)
   .populate({
       path: "books",
-      select: "_id creator users title genre cover available createdAt updatedAt",
+      select: "_id creator users summary title genre cover available createdAt updatedAt",
       populate: [
         {
           path: "author", // select: "_id name",

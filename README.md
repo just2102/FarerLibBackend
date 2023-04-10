@@ -1,3 +1,3 @@
 # FarerLib
 # Documentation 
-## render.com
+## Server is deployed at https://farerlib.onrender.com/
